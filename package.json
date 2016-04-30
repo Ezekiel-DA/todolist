@@ -1,0 +1,26 @@
+{
+  "name": "todolist",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ezekiel-da/todolist.git"
+  },
+  "author": "NLV",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ezekiel-da/todolist/issues"
+  },
+  "homepage": "https://github.com/ezekiel-da/todolist#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  },
+  "dependencies": {
+    "express": "^4.13.4",
+    "mongoose": "^4.4.14"
+  }
+}
