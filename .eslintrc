@@ -1,0 +1,34 @@
+{
+  "env": {
+    "es6": true,
+    // for XDesign
+    "browser": true,
+    "amd": true,
+    // for cmd line utilities
+    "node": true,
+    // for ODTs
+    "jasmine": true
+  },
+
+  "rules": {
+    "strict": [2], // require 'use strict'
+    "semi": [2, "always"], // forbid reliance on ASI
+    "operator-linebreak": [2, "after"], // linebreaks must always be after operators
+    "comma-style": [2, "last"], // linebreaks must always be after commas
+    "no-undef": 2, // variables must always be declared with var (or let/const) (DEFAULT in eslint:recommended)
+    "no-new-wrappers": 2, // do not manually create primitive wrappers (Number, String, Boolean)
+    "no-with": 2, // disallow usage of with statements,
+    "eqeqeq": [2, "smart"], // require usage of === instead of == and !== instead of !=
+    "no-eval": 2, // forbid use of eval()
+    "no-eq-null": 2, // forbid checking variables against null
+
+    "wrap-iife": [2, "any"], // IIFEs should be wrapped in parentheses (style guide does not specifiy "inside" or "outside")
+
+    "no-floating-decimal": 2, // no leading or trailing decimal points in numbers
+    "no-spaced-func": 2, // no space between function name and (
+
+
+    "linebreak-style": 0, // prevent ESLint from complaining about Windows vs Unix style linebreaks
+  },
+  "extends": "eslint:recommended" // DO NOT REMOVE. Adds all of the rules listed as recommeded here : http://eslint.org/docs/rules/index.html
+}
