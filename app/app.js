@@ -32,7 +32,7 @@ var TodoList = React.createClass({
         var todoItems = this.state.tasks.map(task => <TodoItem key= {task._id} task={task} /> );
         return(
             <div className="todoList">
-                <h1>TODO</h1>
+                <h1>TODO1</h1>
                 Things to do:
                 <ul>
                     {todoItems}
