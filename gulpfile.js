@@ -19,7 +19,8 @@ function isFixed(file) {
   return file.eslint && file.eslint.fixed;
 }
 
-var production = process.env.NODE_ENV === 'production';
+//var production = process.env.NODE_ENV === 'production';
+var production = process.env.NODE_ENV;
 
 var jsCodeLocs = ['app/*.js', 'models/*.js', 'server/*.js', '!**/node_modules/**', '!./gulpfile.js'];
 

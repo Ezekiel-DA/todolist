@@ -26,8 +26,9 @@ apiRouter.post('/task', (req, res) => {
     }       
     var task = new Task(req.body); // mongoose will take care of filtering only the info that fits the schema
     task.save().then(task => {
-        res.sendStatus(httpStatus.CREATED);
+        res.send(httpStatus.CREATED, task);
     }).catch(err => {
+        console.log(err);
         res.send(httpStatus.INTERNAL_SERVER_ERROR);
     });    
 });
@@ -43,7 +44,8 @@ apiRouter.route('/task/:id')
     });
 })
 .patch((req, res) => {
-    Task.findByIdAndUpdate(req.params.id, req.body).exec()
+    console.log(req);
+    Task.findByIdAndUpdate(req.params.id, req.body, {new: true}).exec()
     .then(task => {
         res.send(task);
     })
