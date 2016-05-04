@@ -1,7 +1,13 @@
 'use strict';
 
-var React = require('react');
-var ReactDOM = require('react-dom');
+import 'whatwg-fetch';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import Paper from 'material-ui/lib/paper';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
+import Checkbox from 'material-ui/lib/checkbox';
 
 var TodoList = React.createClass({
     getTasks: function() {
@@ -19,12 +25,12 @@ var TodoList = React.createClass({
     taskToggled: function(e) {
         var done = e.target.checked;
         this.setState({tasks: this.state.tasks.map(task => {
-            if (task._id === e.target.value) {
+            if (task._id === e.target.id) {
                 task.done = !task.done;
             }
             return task;
         })});
-        fetch('api/task/'+e.target.value, {
+        fetch('api/task/'+e.target.id, {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({done: done})});
@@ -32,32 +38,30 @@ var TodoList = React.createClass({
     render: function() {
         var todoItems = this.state.tasks.map(task => <TodoItem key= {task._id} task={task} onToggle={this.taskToggled}/> );
         return(
-            <div className="todoList">
-                <h1>TODO</h1>
-                Things to do:
-                <ul>
-                    {todoItems}
-                </ul>
-            </div>
+            <Paper zDepth={1}>
+                <div className="todoList">
+                    
+                    <List subheader="Things to do :">
+                        {todoItems}
+                    </List>
+                </div>
+            </Paper>
         );
     }
 });
 
 var TodoItem = React.createClass({
-    getInitialState: function() {
-        return {done: this.props.task.done};       
-    },
     render: function() {
         var task = this.props.task;
         return(
-            <li className="todoItem">
-                <input type="checkbox" value={task._id} checked={task.done} onChange={this.props.onToggle}/> {task.title}
-            </li>
+            <ListItem className="todoItem">
+                <Checkbox id={task._id} label={task.title} defaultChecked={task.done} onCheck={this.props.onToggle} />
+            </ListItem>
         );
     }
 });
 
 ReactDOM.render(
-    <TodoList pollInterval={10000}/>,
+    <TodoList pollInterval={2000}/>,
     document.getElementById('app')
 );
