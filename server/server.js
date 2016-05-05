@@ -44,7 +44,6 @@ apiRouter.route('/task/:id')
     });
 })
 .patch((req, res) => {
-    console.log(req);
     Task.findByIdAndUpdate(req.params.id, req.body, {new: true}).exec()
     .then(task => {
         res.send(task);
