@@ -89,12 +89,15 @@ var TodoItem = React.createClass({
     render: function() {
         var task = this.props.task;
         return(
-            <ListItem className="todoItem">
-                <Checkbox id={task._id} defaultChecked={task.done} onCheck={this.props.onToggle} label={task.title} />
-                <IconButton tooltip="Delete task forever" onTouchTap={this.props.onDelete} id={task._id}>
-                    <FontIcon className="material-icons">delete_forever</FontIcon>
-                </IconButton>
-            </ListItem>
+            <ListItem className="todoItem"
+                leftCheckbox={<Checkbox id={task._id} defaultChecked={task.done} onCheck={this.props.onToggle}/>}
+                primaryText={task.title}
+                rightIconButton={
+                    <IconButton tooltip="Delete task forever" onTouchTap={this.props.onDelete} id={task._id}>
+                        <FontIcon className="material-icons">delete_forever</FontIcon>
+                    </IconButton>
+                }
+            />
         );
     }
 });
