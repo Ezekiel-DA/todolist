@@ -15,7 +15,7 @@ app.use(express.static('static'));
 
 var apiRouter = express.Router();
 apiRouter.get('/tasks', (req, res) => {
-    Task.find().then(tasks => {
+    Task.find().sort('done').then(tasks => {
         res.send(tasks);
     });
 });

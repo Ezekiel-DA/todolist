@@ -51,6 +51,7 @@ var TodoList = React.createClass({
           title: e.target.value,
           done: false
       };
+      e.target.value = '';
       this.setState({tasks: this.state.tasks.concat(newTask)});
       fetch('api/task', {
           method: 'POST',
@@ -93,7 +94,7 @@ var TodoItem = React.createClass({
                 leftCheckbox={<Checkbox id={task._id} defaultChecked={task.done} onCheck={this.props.onToggle}/>}
                 primaryText={task.title}
                 rightIconButton={
-                    <IconButton tooltip="Delete task forever" onTouchTap={this.props.onDelete} id={task._id}>
+                    <IconButton tooltip="Delete task" onTouchTap={this.props.onDelete} id={task._id}>
                         <FontIcon className="material-icons">delete_forever</FontIcon>
                     </IconButton>
                 }
