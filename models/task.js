@@ -2,7 +2,7 @@
 
 var mongoose = require('mongoose');
 
-var taskSchema = mongoose.Schema({
+var taskSchema = new mongoose.Schema({
     title: {type: String, maxlength: 140, required: true},
     description: {type: String},
     done: {type: Boolean, required: true, default: false}

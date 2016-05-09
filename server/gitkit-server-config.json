@@ -1,0 +1,8 @@
+{
+  "clientId": "904813519777-su2kac95v1dlkl142ri4mo0pgif7bi9m.apps.googleusercontent.com",
+  "projectId": "fridgedoor-1305",
+  "serviceAccountEmail": "",
+  "serviceAccountPrivateKeyFile": "private/fridgeDoor-246b04ea0bd0.json",
+  "widgetUrl": "http://localhost:3000/callback",
+  "cookieName": "gtoken"
+}

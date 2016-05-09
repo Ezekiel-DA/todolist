@@ -37,3 +37,6 @@ node_modules
 
 # minified & bundled code
 static/build
+
+# don't put private key in version control...
+server/private

@@ -1,17 +1,55 @@
 'use strict';
 
 var express = require('express');
+var http = require('http');
+var https = require('https');
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var httpStatus = require('http-status');
 var mongoose = require('mongoose');
-mongoose.Promise = Promise;
 var Task = require('../models/task');
+var User = require('../models/user');
+var fs = require('fs');
+var GitKitClient = require('gitkitclient');
+var morgan = require('morgan');
 
+mongoose.Promise = Promise;
 mongoose.connect('mongodb://localhost/todoList');
 
+var gitkitClient = new GitKitClient(JSON.parse(fs.readFileSync('./server/gitkit-server-config.json')));
+
+function requireHTTPS(req, res, next) {
+    if (!req.secure) {
+        return res.redirect('https://'+req.get('host') + req.url);
+    }
+    next();
+}
+
 var app = express();
+app.use(morgan('combined'));
+//app.use(requireHTTPS);
+app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static('static'));
+
+app.get('/callback', renderLoginCBPage);
+app.post('/callback', renderLoginCBPage);
+
+function renderLoginCBPage(req, res) {
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end(new Buffer(fs.readFileSync('./static/gitkit-widget.html')).toString().replace('%%postBody%%', encodeURIComponent(req.body || '')));
+}
+
+app.get('/user', (req, res) => {
+    if (req.cookies.gtoken) {
+        gitkitClient.verifyGitkitToken(req.cookies.gtoken, (err, res) => {
+            console.log(err);
+            console.log(res);
+        });
+    }
+    res.send(httpStatus.INTERNAL_SERVER_ERROR);
+});
 
 var apiRouter = express.Router();
 apiRouter.get('/tasks', (req, res) => {
@@ -65,4 +103,8 @@ apiRouter.route('/task/:id')
 
 app.use('/api', apiRouter);
 
-app.listen(3000);
+http.createServer(app).listen(80);
+// https.createServer({
+//     key: fs.readFileSync('./server/private/key.pem'),
+//     cert: fs.readFileSync('./server/private/cert.pem')
+// }, app).listen(443);
