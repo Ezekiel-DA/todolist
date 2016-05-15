@@ -1,5 +1,5 @@
 {
-  "widgetUrl": "http://localhost:3000/callback",
+  "widgetUrl": "https://localhost:4430/callback",
   "signInSuccessUrl": "/",
   "signOutUrl": "/",
   "oobActionUrl": "/sendmail",

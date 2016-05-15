@@ -11,7 +11,6 @@ var Task = require('../models/task');
 var User = require('../models/user');
 var fs = require('fs');
 var GitKitClient = require('gitkitclient');
-var morgan = require('morgan');
 
 mongoose.Promise = Promise;
 mongoose.connect('mongodb://localhost/todoList');
@@ -20,26 +19,46 @@ var gitkitClient = new GitKitClient(JSON.parse(fs.readFileSync('./server/gitkit-
 
 function requireHTTPS(req, res, next) {
     if (!req.secure) {
-        return res.redirect('https://'+req.get('host') + req.url);
+        return res.redirect('https://'+req.get('host').replace('8000', '4430') + req.url);
     }
     next();
 }
 
-var app = express();
-app.use(morgan('combined'));
-//app.use(requireHTTPS);
-app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(express.static('static'));
-
-app.get('/callback', renderLoginCBPage);
-app.post('/callback', renderLoginCBPage);
+function requireAuthenticatedUser(req, res, next) {
+    if (req.cookies.gtoken) {
+        gitkitClient.verifyGitkitToken(req.cookies.gtoken, (err, res) => {
+            if (!err) {
+                next();
+            }
+            else {
+                console.log('gtoken invalid, redirecting.');
+                res.redirect('//'+req.get('host')+'/callback?mode=select');
+            }            
+        });
+    }
+    else {
+        console.log('gtoken missing, redirecting.');
+        res.redirect('//'+req.get('host')+'/callback?mode=select');    
+    }
+}
 
 function renderLoginCBPage(req, res) {
     res.writeHead(200, {'Content-Type': 'text/html'});
     res.end(new Buffer(fs.readFileSync('./static/gitkit-widget.html')).toString().replace('%%postBody%%', encodeURIComponent(req.body || '')));
 }
+
+var app = express();
+app.disable('x-powered-by');
+app.use(requireHTTPS);
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+
+app.get('/callback', renderLoginCBPage);
+app.post('/callback', renderLoginCBPage);
+
+app.use(requireAuthenticatedUser);
+app.use(express.static('static'));
 
 app.get('/user', (req, res) => {
     if (req.cookies.gtoken) {
@@ -103,8 +122,8 @@ apiRouter.route('/task/:id')
 
 app.use('/api', apiRouter);
 
-http.createServer(app).listen(80);
-// https.createServer({
-//     key: fs.readFileSync('./server/private/key.pem'),
-//     cert: fs.readFileSync('./server/private/cert.pem')
-// }, app).listen(443);
+http.createServer(app).listen(8000);
+https.createServer({
+    key: fs.readFileSync('./server/private/key.pem'),
+    cert: fs.readFileSync('./server/private/cert.pem')
+}, app).listen(4430);

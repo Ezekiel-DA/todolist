@@ -16,12 +16,40 @@ import TextField from 'material-ui/TextField';
 import FontIcon from 'material-ui/FontIcon';
 import IconButton from 'material-ui/IconButton';
 
+function getTasks() {
+    return fetch('/api/tasks', { credentials: 'include' })
+    .then(function (res) {
+        return res.json();
+    });
+}
+function setTaskDoneState(taskId, state) {
+    return fetch('/api/task/'+taskId, {
+       method: 'PATCH',
+       headers: {'Content-Type': 'application/json'},
+       credentials: 'include',
+       body: JSON.stringify({done: state}) 
+    });
+}
+
+function createTask(newTaskInfo) {
+    return fetch('api/task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(newTaskInfo)
+    });
+}
+
+function deleteTask(taskId) {
+    return fetch('api/task/' + taskId, {
+        method: 'DELETE',
+        credentials: 'include'
+    });
+}
 
 var TodoList = React.createClass({
     getTasks: function() {
-        fetch('/api/tasks')
-            .then(res => res.json())
-            .then(tasks => this.setState({tasks: tasks}));        
+        getTasks().then(tasks => this.setState({ tasks: tasks }));
     },
     getInitialState: function() {
         return {tasks: []};
@@ -38,10 +66,7 @@ var TodoList = React.createClass({
             }
             return task;
         })});
-        fetch('api/task/'+e.target.id, {
-            method: 'PATCH',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({done: done})});
+        setTaskDoneState(e.target.id, done);
     },
     taskAdded: function(e) {
       if (e.key !== "Enter") {
@@ -53,19 +78,12 @@ var TodoList = React.createClass({
       };
       e.target.value = '';
       this.setState({tasks: this.state.tasks.concat(newTask)});
-      fetch('api/task', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(newTask)
-      }).then(console.log.bind(console))
-      .catch(console.log.bind(console));
+      createTask(newTask);
     },
     taskDeleted: function(e) {
         var idToDel = e.currentTarget.id;
         this.setState({tasks: this.state.tasks.filter(task => task._id !== idToDel)});
-        fetch('api/task/'+idToDel, {
-            method: 'DELETE'
-        }).catch(console.log.bind(console));
+        deleteTask(idToDel).catch(console.log.bind(console));
     },
     render: function() {
         var todoItems = this.state.tasks.map(task => <TodoItem key= {task._id} task={task} onToggle={this.taskToggled} onDelete={this.taskDeleted} /> );
@@ -78,7 +96,7 @@ var TodoList = React.createClass({
                         </List>
                     </div>
                     <div className="todoEntry">
-                        <TextField hintText="Add a new task..." onKeyDown={this.taskAdded}/>
+                        <TextField hintText="Add a new task..." onKeyDown={this.taskAdded} onBlur={this.taskAdded}/>
                     </div>
                 </div>
             </MuiThemeProvider>
