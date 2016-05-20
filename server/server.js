@@ -26,9 +26,22 @@ function requireHTTPS(req, res, next) {
 
 function requireAuthenticatedUser(req, res, next) {
     if (req.cookies.gtoken) {
-        gitkitClient.verifyGitkitToken(req.cookies.gtoken, (err, res) => {
+        gitkitClient.verifyGitkitToken(req.cookies.gtoken, (err, id) => {
             if (!err) {
-                next();
+                User.findOneAndUpdate(
+                    {'privateIdentity.oAuth': id.user_id},
+                    {$set: {
+                        'username': id.display_name
+                    }},
+                    {'new': true, upsert: true, runValidators: true}
+                ).then(user => {
+                    req.user = user;
+                    next();
+                }) 
+                .catch(err => {
+                    console.log(err);
+                    throw(err);
+                });
             }
             else {
                 console.log('gtoken invalid, redirecting.');
@@ -72,6 +85,7 @@ app.get('/user', (req, res) => {
 
 var apiRouter = express.Router();
 apiRouter.get('/tasks', (req, res) => {
+    //console.log(req.user);
     Task.find().sort('done').then(tasks => {
         res.send(tasks);
     });

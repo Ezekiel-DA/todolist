@@ -113,7 +113,7 @@ var TodoItem = React.createClass({
                 primaryText={task.title}
                 rightIconButton={
                     <IconButton tooltip="Delete task" onTouchTap={this.props.onDelete} id={task._id}>
-                        <FontIcon className="material-icons">delete_forever</FontIcon>
+                        <FontIcon className="material-icons">delete</FontIcon>
                     </IconButton>
                 }
             />

@@ -6,3 +6,8 @@ body {
   font-size: 13px;
   line-height: 20px;
 }
+
+.fridgeApp {
+  max-width: 600px;
+  margin: 0 auto;
+}
