@@ -11,11 +11,14 @@ var Task = require('../models/task');
 var User = require('../models/user');
 var fs = require('fs');
 var GitKitClient = require('gitkitclient');
+var nodemailer = require('nodemailer');
+var mg = require('nodemailer-mailgun-transport');
 
 mongoose.Promise = Promise;
 mongoose.connect('mongodb://localhost/todoList');
 
 var gitkitClient = new GitKitClient(JSON.parse(fs.readFileSync('./server/gitkit-server-config.json')));
+var nodemailerMailgun = nodemailer.createTransport(mg(JSON.parse(fs.readFileSync('./server/private/mailgun_api.json'))));
 
 function requireHTTPS(req, res, next) {
     if (!req.secure) {
@@ -29,9 +32,10 @@ function requireAuthenticatedUser(req, res, next) {
         gitkitClient.verifyGitkitToken(req.cookies.gtoken, (err, id) => {
             if (!err) {
                 User.findOneAndUpdate(
-                    {'privateIdentity.oAuth': id.user_id},
+                    {'privateIdentity.oauth': id.user_id},
                     {$set: {
-                        'username': id.display_name
+                        'username': id.display_name,
+                        'email': id.email
                     }},
                     {'new': true, upsert: true, runValidators: true}
                 ).then(user => {
@@ -60,6 +64,26 @@ function renderLoginCBPage(req, res) {
     res.end(new Buffer(fs.readFileSync('./static/gitkit-widget.html')).toString().replace('%%postBody%%', encodeURIComponent(req.body || '')));
 }
 
+// function handleMail(req, res) {
+//     app.disable('etag');
+//     gitkitClient.getOobResult(req.body, req.ip, req.cookies.gtoken, function(err, resp) {
+//     if (err) {
+//         console.log('Error: ' + JSON.stringify(err));
+//     }
+//     else {
+//         var forgottenPwdEmail = JSON.parse(fs.readFileSync('./email_templates/lostPwd.json'));
+//         forgottenPwdEmail.to = '';
+//         //forgottenPwdEmail.html += '';
+//         console.log();
+//         nodemailerMailgun.sendMail();
+//         console.log('Send email: ' + JSON.stringify(resp));
+//     }
+//     res.statusCode = 200;
+//     res.setHeader('Content-Type', 'text/html');
+//     res.end(resp.responseBody);
+//     });
+// }
+
 var app = express();
 app.disable('x-powered-by');
 app.use(requireHTTPS);
@@ -69,26 +93,24 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 app.get('/callback', renderLoginCBPage);
 app.post('/callback', renderLoginCBPage);
+//app.get('/sendmail', handleMail);
 
 app.use(requireAuthenticatedUser);
 app.use(express.static('static'));
 
 app.get('/user', (req, res) => {
-    if (req.cookies.gtoken) {
-        gitkitClient.verifyGitkitToken(req.cookies.gtoken, (err, res) => {
-            console.log(err);
-            console.log(res);
-        });
-    }
-    res.send(httpStatus.INTERNAL_SERVER_ERROR);
+    res.send(req.user);
 });
 
 var apiRouter = express.Router();
 apiRouter.get('/tasks', (req, res) => {
-    //console.log(req.user);
-    Task.find().sort('done').then(tasks => {
-        res.send(tasks);
-    });
+    req.user.populate({
+        path: 'myTasks',
+        options : { sort: {'done': -1} }
+    }).execPopulate()
+    .then(user => {
+        return res.send(user.myTasks);
+    }).catch(console.log.bind(console));
 });
 
 apiRouter.post('/task', (req, res) => {
@@ -96,24 +118,26 @@ apiRouter.post('/task', (req, res) => {
         return res.sendStatus(httpStatus.BAD_REQUEST);
     }       
     var task = new Task(req.body); // mongoose will take care of filtering only the info that fits the schema
-    task.save().then(task => {
-        res.send(httpStatus.CREATED, task);
-    }).catch(err => {
+    return task.save().then(task => {
+        req.user.myTasks.push(task._id);
+        return req.user.save();
+    }).then(user => res.send(httpStatus.CREATED, task))         
+    .catch(err => {
         console.log(err);
         res.send(httpStatus.INTERNAL_SERVER_ERROR);
     });    
 });
 apiRouter.route('/task/:id')
-.get((req, res) => {
-    Task.findById(req.params.id).exec()
-    .then(task => {
-        res.send(task);
-    })
-    .catch(err => {
-        console.log(err);
-        res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
-    });
-})
+// .get((req, res) => {
+//     Task.findById(req.params.id).exec()
+//     .then(task => {
+//         res.send(task);
+//     })
+//     .catch(err => {
+//         console.log(err);
+//         res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
+//     });
+// })
 .patch((req, res) => {
     Task.findByIdAndUpdate(req.params.id, req.body, {new: true}).exec()
     .then(task => {
@@ -124,6 +148,19 @@ apiRouter.route('/task/:id')
         res.send(httpStatus.INTERNAL_SERVER_ERROR);
     });
 }).delete((req, res) => {
+    var posInMyTasks = req.user.myTasks.indexOf(req.params.id);
+    var posInFridgeTasks = req.user.fridge.tasks.indexOf(req.params.id);
+    if (posInMyTasks !== -1) {
+        req.user.myTasks.splice(posInMyTasks, 1);
+    }
+    else if (posInFridgeTasks !== -1) {
+        req.user.fridge.tasks.splice(posInFridgeTasks, 1);
+        // TODO : handle deletion for other users !
+    }
+    else { // task not present in this users' private or fridge tasks; cancel request
+        return res.sendStatus(httpStatus.BAD_REQUEST);
+    }
+    req.user.save();
     Task.remove({_id: req.params.id}).exec()
     .then(() => {
         res.sendStatus(httpStatus.OK);

@@ -3,13 +3,15 @@
 var mongoose = require('mongoose');
 
 var userSchema = new mongoose.Schema({
-    username: {type: String, required: true, unique: true, lowercase: true},
+    username: {type: String, required: true},
+    email: {type: String, required: true, unique: true, lowercase: true},
     privateIdentity: {
-        oauth: {type: String, required: true}
+        oauth: {type: String, required: true, unique:true}
     },
-    myTasks: [mongoose.Schema.ObjectId],
+    myTasks: [{type: mongoose.Schema.ObjectId, ref: 'Task'}],
     fridge: {
-        tasks: [mongoose.Schema.ObjectId]
+        friends: [{type: mongoose.Schema.ObjectId, ref: 'User'}],
+        tasks: [{type: mongoose.Schema.ObjectId, ref: 'Task'}]
     }
 });
 
