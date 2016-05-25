@@ -15,6 +15,9 @@ import Checkbox from 'material-ui/Checkbox';
 import TextField from 'material-ui/TextField';
 import FontIcon from 'material-ui/FontIcon';
 import IconButton from 'material-ui/IconButton';
+import Toggle from 'material-ui/Toggle';
+import Subheader from 'material-ui/Subheader';
+import Divider from 'material-ui/Divider';
 
 function getTasks() {
     return fetch('/api/tasks', { credentials: 'include' })
@@ -47,12 +50,12 @@ function deleteTask(taskId) {
     });
 }
 
-var TodoList = React.createClass({
+var TodoApp = React.createClass({
     getTasks: function() {
         getTasks().then(tasks => this.setState({ tasks: tasks }));
     },
     getInitialState: function() {
-        return {tasks: []};
+        return {tasks: [], fridgeTasks: []};
     },
     componentDidMount: function() {
         this.getTasks();
@@ -86,17 +89,28 @@ var TodoList = React.createClass({
         deleteTask(idToDel).catch(console.log.bind(console));
     },
     render: function() {
-        var todoItems = this.state.tasks.map(task => <TodoItem key= {task._id} task={task} onToggle={this.taskToggled} onDelete={this.taskDeleted} /> );
+        var myTodoItems = this.state.tasks.map(task => <TodoItem key= {task._id} task={task} onToggle={this.taskToggled} onDelete={this.taskDeleted} /> );
+        var fridgeTodoItems = this.state.fridgeTasks.map(fridgeTask => <TodoItem key= {task._id} task={task} onToggle={this.taskToggled} onDelete={this.taskDeleted} /> );
         return(
             <MuiThemeProvider muiTheme={getMuiTheme({})}>
                 <div className="fridgeApp">
                     <div className="todoList">
-                        <List>
-                            {todoItems}
-                        </List>
+                        <Subheader>My private tasks</Subheader>
+                            <List>
+                                {myTodoItems}
+                            </List>
+                        <Divider />
+                        <Subheader>My shared tasks</Subheader>
+                            <List>
+                                {fridgeTodoItems}
+                            </List>
                     </div>
                     <div className="todoEntry">
-                        <TextField hintText="Add a new task..." onKeyDown={this.taskAdded} onBlur={this.taskAdded}/>
+                        <span>
+                            <TextField hintText="Enter your new task and hit enter..." floatingLabelText="New task"
+                                       onKeyDown={this.taskAdded} onBlur={this.taskAdded}/>
+                            <Toggle label="Shared"/>
+                        </span>
                     </div>
                 </div>
             </MuiThemeProvider>
@@ -122,6 +136,6 @@ var TodoItem = React.createClass({
 });
 
 ReactDOM.render(
-    <TodoList pollInterval={2000}/>,
+    <TodoApp pollInterval={2000}/>,
     document.getElementById('app')
 );
