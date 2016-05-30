@@ -18,7 +18,7 @@ mongoose.Promise = Promise;
 mongoose.connect('mongodb://localhost/todoList');
 
 var gitkitClient = new GitKitClient(JSON.parse(fs.readFileSync('./server/gitkit-server-config.json')));
-var nodemailerMailgun = nodemailer.createTransport(mg(JSON.parse(fs.readFileSync('./server/private/mailgun_api.json'))));
+var nodemailerMailgun = nodemailer.createTransport(mg(JSON.parse(fs.readFileSync('./private/mailgun_api.json'))));
 
 function requireHTTPS(req, res, next) {
     if (!req.secure) {
@@ -175,6 +175,6 @@ app.use('/api', apiRouter);
 
 http.createServer(app).listen(8000);
 https.createServer({
-    key: fs.readFileSync('./server/private/key.pem'),
-    cert: fs.readFileSync('./server/private/cert.pem')
+    key: fs.readFileSync('./private/self-signed-private.key'),
+    cert: fs.readFileSync('./private/self-signed-public.cert')
 }, app).listen(4430);

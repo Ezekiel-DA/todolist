@@ -39,7 +39,7 @@ node_modules
 static/build
 
 # don't put private key in version control...
-server/private
+private/
 
 # Vagrant
 .vagrant/

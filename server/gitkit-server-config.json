@@ -1,8 +1,8 @@
 {
-  "clientId": "904813519777-su2kac95v1dlkl142ri4mo0pgif7bi9m.apps.googleusercontent.com",
+  "clientId": "904813519777-8mf0tbt2ubqorqmp6g4dccd10qut7rnm.apps.googleusercontent.com",
   "projectId": "fridgedoor-1305",
   "serviceAccountEmail": "",
-  "serviceAccountPrivateKeyFile": "private/fridgeDoor-246b04ea0bd0.json",
-  "widgetUrl": "https://www.fridge-todo.com/callback",
+  "serviceAccountPrivateKeyFile": "../private/gitkit-server-private-key.json",
+  "widgetUrl": "https://www.fridge-todo.com:4330/callback",
   "cookieName": "gtoken"
 }
