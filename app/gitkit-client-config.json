@@ -1,9 +1,0 @@
-{
-  "widgetUrl": "https://localhost:4430/callback",
-  "signInSuccessUrl": "/",
-  "signOutUrl": "/",
-  "oobActionUrl": "/sendmail",
-  "apiKey": "AIzaSyCfocTKWuZK4dMySruul0Pmaye8oT9m4bA",
-  "siteName": "this site",
-  "signInOptions": ["password","google"]
-}

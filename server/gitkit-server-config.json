@@ -3,6 +3,6 @@
   "projectId": "fridgedoor-1305",
   "serviceAccountEmail": "",
   "serviceAccountPrivateKeyFile": "private/fridgeDoor-246b04ea0bd0.json",
-  "widgetUrl": "https://localhost:4430/callback",
+  "widgetUrl": "https://www.fridge-todo.com/callback",
   "cookieName": "gtoken"
 }
